@@ -1,7 +1,9 @@
 package gap
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 )
@@ -30,15 +32,26 @@ func validateInterface(rtype reflect.Type) {
 }
 
 func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) {
-	input := reflect.New(ep.rtype.In(0)).Elem()
+	input := reflect.New(ep.rtype.In(0))
+	jsonWasRead := false
 	for i := 0; i < ep.rtype.In(0).NumField(); i++ {
 		field := ep.rtype.In(0).Field(i)
 		if header, ok := field.Tag.Lookup("header"); ok {
-			input.FieldByName(field.Name).SetString(request.Header.Get(header))
+			input.Elem().FieldByName(field.Name).SetString(request.Header.Get(header))
 		}
 		if query, ok := field.Tag.Lookup("query"); ok {
-			input.FieldByName(field.Name).SetString(request.URL.Query().Get(query))
+			input.Elem().FieldByName(field.Name).SetString(request.URL.Query().Get(query))
+		}
+		if _, ok := field.Tag.Lookup("json"); ok && !jsonWasRead {
+			body, err := ioutil.ReadAll(request.Body)
+			if err != nil {
+				panic(err)
+			}
+			if err := json.Unmarshal(body, input.Interface()); err != nil {
+				panic(err)
+			}
+			jsonWasRead = true
 		}
 	}
-	ep.rval.Call([]reflect.Value{input})
+	ep.rval.Call([]reflect.Value{input.Elem()})
 }

@@ -2,6 +2,7 @@ package gap
 
 import (
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -88,6 +89,24 @@ func TestEndpoint(t *testing.T) {
 			}
 			ep := newEndpoint(fn)
 			request := httptest.NewRequest("GET", "/hello?limit=10&page=2", nil)
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+		})
+
+		t.Run("can get input from json body", func(t *testing.T) {
+			type tIn struct {
+				Title  string `json:"title"`
+				Public bool   `json:"public"`
+			}
+			type tOut struct{}
+			fn := func(input tIn) (tOut, error) {
+				if input.Title != "lorem ipsum" || !input.Public {
+					t.Error("failed to fetch input from json")
+				}
+				return tOut{}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello", strings.NewReader(`{"title": "lorem ipsum", "public": true}`))
 			response := httptest.NewRecorder()
 			ep.handle(request, response)
 		})
