@@ -55,6 +55,7 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 	}
 	result := ep.rval.Call([]reflect.Value{input.Elem()})
 	output, _ := result[0], result[1]
+	bodyMap := map[string]interface{}{}
 	for i := 0; i < ep.rtype.Out(0).NumField(); i++ {
 		field := ep.rtype.Out(0).Field(i)
 		if header, ok := field.Tag.Lookup("header"); ok {
@@ -62,5 +63,13 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 				response.Header().Add(header, hval)
 			}
 		}
+		if jtag, ok := field.Tag.Lookup("json"); ok {
+			bodyMap[jtag] = output.FieldByName(field.Name).Interface()
+		}
 	}
+	jsonBody, err := json.Marshal(bodyMap)
+	if err != nil {
+		panic(err)
+	}
+	response.Write(jsonBody)
 }

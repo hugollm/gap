@@ -1,6 +1,7 @@
 package gap
 
 import (
+	"encoding/json"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -152,6 +153,26 @@ func TestEndpoint(t *testing.T) {
 			}
 			if response.Result().Header.Get("cache-control") != "no-cache" {
 				t.Error("failed to set cache-control header")
+			}
+		})
+
+		t.Run("can output to json", func(t *testing.T) {
+			type tIn struct{}
+			type tOut struct {
+				Title  string `json:"title"`
+				Public bool   `json:"public"`
+			}
+			fn := func(input tIn) (tOut, error) {
+				return tOut{"lorem ipsum", true}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello", nil)
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+			output := tOut{}
+			json.Unmarshal(response.Body.Bytes(), &output)
+			if output.Title != "lorem ipsum" || output.Public != true {
+				t.Error("failed to output json body")
 			}
 		})
 	})
