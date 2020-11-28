@@ -53,5 +53,14 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 			jsonWasRead = true
 		}
 	}
-	ep.rval.Call([]reflect.Value{input.Elem()})
+	result := ep.rval.Call([]reflect.Value{input.Elem()})
+	output, _ := result[0], result[1]
+	for i := 0; i < ep.rtype.Out(0).NumField(); i++ {
+		field := ep.rtype.Out(0).Field(i)
+		if header, ok := field.Tag.Lookup("header"); ok {
+			if hval, ok := output.FieldByName(field.Name).Interface().(string); ok {
+				response.Header().Add(header, hval)
+			}
+		}
+	}
 }
