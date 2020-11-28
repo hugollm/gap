@@ -1,6 +1,7 @@
 package gap
 
 import (
+	"net/http/httptest"
 	"testing"
 )
 
@@ -33,6 +34,46 @@ func TestEndpoint(t *testing.T) {
 			newEndpoint(func(input helloInput) (helloOutput, string) { return helloOutput{}, "error" })
 		})
 	})
+
+	t.Run("handle calls underlying function", func(t *testing.T) {
+		called := false
+		type tIn struct{}
+		type tOut struct{}
+		fn := func(input tIn) (tOut, error) {
+			called = true
+			return tOut{}, nil
+		}
+		ep := newEndpoint(fn)
+		request := httptest.NewRequest("GET", "/hello", nil)
+		response := httptest.NewRecorder()
+		ep.handle(request, response)
+		if !called {
+			t.Error("endpoint was not called")
+		}
+	})
+
+	t.Run("can handle request input", func(t *testing.T) {
+
+		t.Run("can get input from headers", func(t *testing.T) {
+			type tIn struct {
+				Auth        string `header:"authorization"`
+				ContentType string `header:"content-type"`
+			}
+			type tOut struct{}
+			fn := func(input tIn) (tOut, error) {
+				if input.Auth != "token" || input.ContentType != "application/json" {
+					t.Error("failed to fetch input headers")
+				}
+				return tOut{}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello", nil)
+			request.Header.Set("Authorization", "token")
+			request.Header.Set("Content-Type", "application/json")
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+		})
+	})
 }
 
 type helloInput struct {
@@ -45,27 +86,4 @@ type helloOutput struct {
 
 func hello(input helloInput) (helloOutput, error) {
 	return helloOutput{Message: "hello " + input.Name}, nil
-}
-
-func assertDoesNotPanic(t *testing.T) {
-	err := recover()
-	if err != nil {
-		t.Errorf("did panic")
-	}
-}
-
-func assertPanics(t *testing.T, msg string) {
-	ierr := recover()
-	if ierr == nil {
-		t.Errorf("did not panic")
-	} else {
-		err, ok := ierr.(error)
-		if ok {
-			if err.Error() != msg {
-				t.Errorf(`panic message was wrong: "%s"`, err.Error())
-			}
-		} else {
-			panic(ierr)
-		}
-	}
 }

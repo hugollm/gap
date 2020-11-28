@@ -2,6 +2,7 @@ package gap
 
 import (
 	"errors"
+	"net/http"
 	"reflect"
 )
 
@@ -26,4 +27,15 @@ func validateInterface(rtype reflect.Type) {
 		!rtype.Out(1).Implements(reflect.TypeOf((*error)(nil)).Elem()) {
 		panic(errors.New("endpoint interface must be: func(struct) (struct, error)"))
 	}
+}
+
+func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) {
+	input := reflect.New(ep.rtype.In(0)).Elem()
+	for i := 0; i < ep.rtype.In(0).NumField(); i++ {
+		field := ep.rtype.In(0).Field(i)
+		if header, ok := field.Tag.Lookup("header"); ok {
+			input.FieldByName(field.Name).SetString(request.Header.Get(header))
+		}
+	}
+	ep.rval.Call([]reflect.Value{input})
 }
