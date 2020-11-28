@@ -73,6 +73,24 @@ func TestEndpoint(t *testing.T) {
 			response := httptest.NewRecorder()
 			ep.handle(request, response)
 		})
+
+		t.Run("can get input from query string", func(t *testing.T) {
+			type tIn struct {
+				Limit string `query:"limit"`
+				Page  string `query:"page"`
+			}
+			type tOut struct{}
+			fn := func(input tIn) (tOut, error) {
+				if input.Limit != "10" || input.Page != "2" {
+					t.Error("failed to fetch input queries")
+				}
+				return tOut{}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello?limit=10&page=2", nil)
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+		})
 	})
 }
 

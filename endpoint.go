@@ -36,6 +36,9 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 		if header, ok := field.Tag.Lookup("header"); ok {
 			input.FieldByName(field.Name).SetString(request.Header.Get(header))
 		}
+		if query, ok := field.Tag.Lookup("query"); ok {
+			input.FieldByName(field.Name).SetString(request.URL.Query().Get(query))
+		}
 	}
 	ep.rval.Call([]reflect.Value{input})
 }
