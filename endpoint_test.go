@@ -2,6 +2,7 @@ package gap
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -173,6 +174,26 @@ func TestEndpoint(t *testing.T) {
 			json.Unmarshal(response.Body.Bytes(), &output)
 			if output.Title != "lorem ipsum" || output.Public != true {
 				t.Error("failed to output json body")
+			}
+		})
+
+		t.Run("can output error as bad request", func(t *testing.T) {
+			type tIn struct{}
+			type tOut struct{}
+			fn := func(input tIn) (tOut, error) {
+				return tOut{}, errors.New("validation error")
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello", nil)
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+			output := map[string]string{}
+			json.Unmarshal(response.Body.Bytes(), &output)
+			if response.Result().StatusCode != 400 {
+				t.Error("failed to set status code")
+			}
+			if len(output) != 1 || output["error"] != "validation error" {
+				t.Error("failed to output json body with error")
 			}
 		})
 	})

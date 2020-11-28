@@ -54,18 +54,23 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 		}
 	}
 	result := ep.rval.Call([]reflect.Value{input.Elem()})
-	output, _ := result[0], result[1]
+	output, outErr := result[0], result[1]
 	bodyMap := map[string]interface{}{}
-	for i := 0; i < ep.rtype.Out(0).NumField(); i++ {
-		field := ep.rtype.Out(0).Field(i)
-		if header, ok := field.Tag.Lookup("header"); ok {
-			if hval, ok := output.FieldByName(field.Name).Interface().(string); ok {
-				response.Header().Add(header, hval)
+	if outErr.Interface() == nil {
+		for i := 0; i < ep.rtype.Out(0).NumField(); i++ {
+			field := ep.rtype.Out(0).Field(i)
+			if header, ok := field.Tag.Lookup("header"); ok {
+				if hval, ok := output.FieldByName(field.Name).Interface().(string); ok {
+					response.Header().Add(header, hval)
+				}
+			}
+			if jtag, ok := field.Tag.Lookup("json"); ok {
+				bodyMap[jtag] = output.FieldByName(field.Name).Interface()
 			}
 		}
-		if jtag, ok := field.Tag.Lookup("json"); ok {
-			bodyMap[jtag] = output.FieldByName(field.Name).Interface()
-		}
+	} else {
+		response.WriteHeader(400)
+		bodyMap["error"] = outErr.Interface().(error).Error()
 	}
 	jsonBody, err := json.Marshal(bodyMap)
 	if err != nil {
