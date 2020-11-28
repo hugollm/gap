@@ -110,6 +110,26 @@ func TestEndpoint(t *testing.T) {
 			response := httptest.NewRecorder()
 			ep.handle(request, response)
 		})
+
+		t.Run("can get input from multiple sources with the same name", func(t *testing.T) {
+			type tIn struct {
+				HeaderAuth string `header:"auth"`
+				QueryAuth string `query:"auth"`
+				JsonAuth string `json:"auth"`
+			}
+			type tOut struct{}
+			fn := func(input tIn) (tOut, error) {
+				if input.HeaderAuth != "hauth" || input.QueryAuth != "qauth" || input.JsonAuth != "jauth" {
+					t.Error("failed to fetch input from multiple sources")
+				}
+				return tOut{}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello?auth=qauth", strings.NewReader(`{"auth": "jauth"}`))
+			request.Header.Set("auth", "hauth")
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+		})
 	})
 }
 
