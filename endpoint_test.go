@@ -177,7 +177,7 @@ func TestEndpoint(t *testing.T) {
 			}
 		})
 
-		t.Run("can output error as bad request", func(t *testing.T) {
+		t.Run("outputs endpoint error as bad request", func(t *testing.T) {
 			type tIn struct{}
 			type tOut struct{}
 			fn := func(input tIn) (tOut, error) {
@@ -193,6 +193,27 @@ func TestEndpoint(t *testing.T) {
 				t.Error("failed to set status code")
 			}
 			if len(output) != 1 || output["error"] != "validation error" {
+				t.Error("failed to output json body with error")
+			}
+		})
+
+		t.Run("outputs panic as server error", func(t *testing.T) {
+			type tIn struct{}
+			type tOut struct{}
+			fn := func(input tIn) (tOut, error) {
+				panic("something went wrong")
+				return tOut{}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello", nil)
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+			output := map[string]string{}
+			json.Unmarshal(response.Body.Bytes(), &output)
+			if response.Result().StatusCode != 500 {
+				t.Error("failed to set status code")
+			}
+			if len(output) != 1 || output["error"] != "server error" {
 				t.Error("failed to output json body with error")
 			}
 		})

@@ -32,6 +32,7 @@ func validateInterface(rtype reflect.Type) {
 }
 
 func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) {
+	defer writeServerErrorOnPanic(response)
 	input := reflect.New(ep.rtype.In(0))
 	jsonWasRead := false
 	for i := 0; i < ep.rtype.In(0).NumField(); i++ {
@@ -77,4 +78,16 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 		panic(err)
 	}
 	response.Write(jsonBody)
+}
+
+func writeServerErrorOnPanic(response http.ResponseWriter) {
+	err := recover()
+	if err != nil {
+		jsonBody, err := json.Marshal(map[string]string{"error": "server error"})
+		if err != nil {
+			panic(err)
+		}
+		response.WriteHeader(500)
+		response.Write(jsonBody)
+	}
 }
