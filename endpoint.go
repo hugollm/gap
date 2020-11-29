@@ -33,6 +33,20 @@ func validateInterface(rtype reflect.Type) {
 
 func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) {
 	defer writeServerErrorOnPanic(response)
+	input := ep.readInput(request)
+	result := ep.rval.Call([]reflect.Value{input.Elem()})
+	ep.writeOutput(response, result)
+}
+
+func writeServerErrorOnPanic(response http.ResponseWriter) {
+	err := recover()
+	if err != nil {
+		response.WriteHeader(500)
+		response.Write([]byte(`{"error":"server error"}`))
+	}
+}
+
+func (ep *endpoint) readInput(request *http.Request) reflect.Value {
 	input := reflect.New(ep.rtype.In(0))
 	jsonWasRead := false
 	for i := 0; i < ep.rtype.In(0).NumField(); i++ {
@@ -54,7 +68,10 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 			jsonWasRead = true
 		}
 	}
-	result := ep.rval.Call([]reflect.Value{input.Elem()})
+	return input
+}
+
+func (ep *endpoint) writeOutput(response http.ResponseWriter, result []reflect.Value) {
 	output, outErr := result[0], result[1]
 	bodyMap := map[string]interface{}{}
 	if outErr.Interface() == nil {
@@ -78,12 +95,4 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 		panic(err)
 	}
 	response.Write(jsonBody)
-}
-
-func writeServerErrorOnPanic(response http.ResponseWriter) {
-	err := recover()
-	if err != nil {
-		response.WriteHeader(500)
-		response.Write([]byte(`{"error":"server error"}`))
-	}
 }
