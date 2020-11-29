@@ -83,11 +83,7 @@ func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) 
 func writeServerErrorOnPanic(response http.ResponseWriter) {
 	err := recover()
 	if err != nil {
-		jsonBody, err := json.Marshal(map[string]string{"error": "server error"})
-		if err != nil {
-			panic(err)
-		}
 		response.WriteHeader(500)
-		response.Write(jsonBody)
+		response.Write([]byte(`{"error":"server error"}`))
 	}
 }
