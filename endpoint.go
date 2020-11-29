@@ -1,16 +1,16 @@
 package gap
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 )
 
 type endpoint struct {
-	rval  reflect.Value
-	rtype reflect.Type
+	rval      reflect.Value
+	rtype     reflect.Type
+	inFields  map[string]inputField
+	outFields map[string]outputField
 }
 
 func newEndpoint(function interface{}) endpoint {
@@ -18,6 +18,8 @@ func newEndpoint(function interface{}) endpoint {
 	ep.rval = reflect.ValueOf(function)
 	ep.rtype = reflect.TypeOf(function)
 	validateInterface(ep.rtype)
+	ep.setupInputFields()
+	ep.setupOutputFields()
 	return ep
 }
 
@@ -28,6 +30,22 @@ func validateInterface(rtype reflect.Type) {
 		rtype.Out(0).Kind() != reflect.Struct ||
 		!rtype.Out(1).Implements(reflect.TypeOf((*error)(nil)).Elem()) {
 		panic(errors.New("endpoint interface must be: func(struct) (struct, error)"))
+	}
+}
+
+func (ep *endpoint) setupInputFields() {
+	ep.inFields = map[string]inputField{}
+	for i := 0; i < ep.rtype.In(0).NumField(); i++ {
+		field := ep.rtype.In(0).Field(i)
+		ep.inFields[field.Name] = newInputField(field)
+	}
+}
+
+func (ep *endpoint) setupOutputFields() {
+	ep.outFields = map[string]outputField{}
+	for i := 0; i < ep.rtype.Out(0).NumField(); i++ {
+		field := ep.rtype.Out(0).Field(i)
+		ep.outFields[field.Name] = newOutputField(field)
 	}
 }
 
@@ -46,53 +64,25 @@ func writeServerErrorOnPanic(response http.ResponseWriter) {
 	}
 }
 
-func (ep *endpoint) readInput(request *http.Request) reflect.Value {
+func (ep *endpoint) readInput(httpRequest *http.Request) reflect.Value {
+	request := newLazyRequest(httpRequest)
 	input := reflect.New(ep.rtype.In(0))
-	jsonWasRead := false
-	for i := 0; i < ep.rtype.In(0).NumField(); i++ {
-		field := ep.rtype.In(0).Field(i)
-		if header, ok := field.Tag.Lookup("header"); ok {
-			input.Elem().FieldByName(field.Name).SetString(request.Header.Get(header))
-		}
-		if query, ok := field.Tag.Lookup("query"); ok {
-			input.Elem().FieldByName(field.Name).SetString(request.URL.Query().Get(query))
-		}
-		if _, ok := field.Tag.Lookup("json"); ok && !jsonWasRead {
-			body, err := ioutil.ReadAll(request.Body)
-			if err != nil {
-				panic(err)
-			}
-			if err := json.Unmarshal(body, input.Interface()); err != nil {
-				panic(err)
-			}
-			jsonWasRead = true
-		}
+	for name, field := range ep.inFields {
+		input.FieldByName(name).Set(field.read(request))
 	}
 	return input
 }
 
-func (ep *endpoint) writeOutput(response http.ResponseWriter, result []reflect.Value) {
+func (ep *endpoint) writeOutput(httpResponse http.ResponseWriter, result []reflect.Value) {
+	response := newLazyResponse(httpResponse)
 	output, outErr := result[0], result[1]
-	bodyMap := map[string]interface{}{}
-	if outErr.Interface() == nil {
-		for i := 0; i < ep.rtype.Out(0).NumField(); i++ {
-			field := ep.rtype.Out(0).Field(i)
-			if header, ok := field.Tag.Lookup("header"); ok {
-				if hval, ok := output.FieldByName(field.Name).Interface().(string); ok {
-					response.Header().Add(header, hval)
-				}
-			}
-			if jtag, ok := field.Tag.Lookup("json"); ok {
-				bodyMap[jtag] = output.FieldByName(field.Name).Interface()
-			}
+	if outErr.IsZero() {
+		for name, field := range ep.outFields {
+			field.write(response, output.FieldByName(name))
 		}
+		response.send(200)
 	} else {
-		response.WriteHeader(400)
-		bodyMap["error"] = outErr.Interface().(error).Error()
+		response.setJson("error", outErr.Interface().(error).Error())
+		response.send(400)
 	}
-	jsonBody, err := json.Marshal(bodyMap)
-	if err != nil {
-		panic(err)
-	}
-	response.Write(jsonBody)
 }
