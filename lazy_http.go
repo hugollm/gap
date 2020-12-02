@@ -31,7 +31,7 @@ func (request *lazyRequest) getJson(key string) interface{} {
 			panic(err)
 		}
 		if err := json.Unmarshal(body, &request.parsedJson); err != nil {
-			panic(err)
+			panic(Response(400, map[string]string{"error": "invalid json"}))
 		}
 	}
 	return request.parsedJson[key]
