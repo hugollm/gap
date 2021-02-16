@@ -12,29 +12,34 @@ func TestEndpoint(t *testing.T) {
 
 	t.Run("can be constructed from func with right interface", func(t *testing.T) {
 		defer assertDoesNotPanic(t)
-		newEndpoint(hello)
+		type tIn struct {}
+		type tOut struct {}
+		newEndpoint(func (input tIn) (tOut, error) { return tOut{}, nil })
 	})
 
 	t.Run("cannot be constructed from func with wrong interface", func(t *testing.T) {
 
+		type tIn struct {}
+		type tOut struct {}
+
 		t.Run("wrong number of arguments", func(t *testing.T) {
 			defer assertPanics(t, "endpoint interface must be: func(struct) (struct, error)")
-			newEndpoint(func(input helloInput) helloOutput { return helloOutput{} })
+			newEndpoint(func(input tIn) tOut { return tOut{} })
 		})
 
 		t.Run("input is not struct", func(t *testing.T) {
 			defer assertPanics(t, "endpoint interface must be: func(struct) (struct, error)")
-			newEndpoint(func(input string) (helloOutput, error) { return helloOutput{}, nil })
+			newEndpoint(func(input string) (tOut, error) { return tOut{}, nil })
 		})
 
 		t.Run("first output is not struct", func(t *testing.T) {
 			defer assertPanics(t, "endpoint interface must be: func(struct) (struct, error)")
-			newEndpoint(func(input helloInput) (string, error) { return "hello", nil })
+			newEndpoint(func(input tIn) (string, error) { return "hello", nil })
 		})
 
 		t.Run("second output is not error", func(t *testing.T) {
 			defer assertPanics(t, "endpoint interface must be: func(struct) (struct, error)")
-			newEndpoint(func(input helloInput) (helloOutput, string) { return helloOutput{}, "error" })
+			newEndpoint(func(input tIn) (tOut, string) { return tOut{}, "error" })
 		})
 	})
 
@@ -218,16 +223,4 @@ func TestEndpoint(t *testing.T) {
 			}
 		})
 	})
-}
-
-type helloInput struct {
-	Name string `json:"name"`
-}
-
-type helloOutput struct {
-	Message string `json:"message"`
-}
-
-func hello(input helloInput) (helloOutput, error) {
-	return helloOutput{Message: "hello " + input.Name}, nil
 }
