@@ -3,6 +3,7 @@ package gap
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -44,6 +45,10 @@ func (app *App) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	route.endpoint.handle(request, response)
+}
+
+func (app *App) Run() {
+	log.Fatal(http.ListenAndServe(":8000", app))
 }
 
 func writeNotFound(response http.ResponseWriter) {
