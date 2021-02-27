@@ -18,6 +18,9 @@ func newInputField(field reflect.StructField) inputField {
 	if key, ok := field.Tag.Lookup("json"); ok {
 		return jsonInput{key}
 	}
+	if _, ok := field.Tag.Lookup("body"); ok {
+		return bodyInput{}
+	}
 	panic("invalid input field")
 }
 
@@ -43,4 +46,10 @@ type jsonInput struct {
 
 func (input jsonInput) read(request *lazyRequest) reflect.Value {
 	return reflect.ValueOf(request.getJson(input.key))
+}
+
+type bodyInput struct {}
+
+func (input bodyInput) read(request *lazyRequest) reflect.Value {
+	return reflect.ValueOf(request.httpRequest.Body)
 }

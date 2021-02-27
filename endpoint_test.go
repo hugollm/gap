@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"io/ioutil"
+	"io"
 )
 
 func TestEndpoint(t *testing.T) {
@@ -134,6 +136,24 @@ func TestEndpoint(t *testing.T) {
 			ep := newEndpoint(fn)
 			request := httptest.NewRequest("GET", "/hello?auth=qauth", strings.NewReader(`{"auth": "jauth"}`))
 			request.Header.Set("auth", "hauth")
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+		})
+
+		t.Run("can get whole request body as input", func(t *testing.T) {
+			type tIn struct {
+				Body io.Reader `body:"*"`
+			}
+			type tOut struct{}
+			fn := func(input tIn) (tOut, error) {
+				body, _ := ioutil.ReadAll(input.Body)
+				if string(body) != "lorem ipsum" {
+					t.Error("failed to fetch body as input")
+				}
+				return tOut{}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello?auth=qauth", strings.NewReader("lorem ipsum"))
 			response := httptest.NewRecorder()
 			ep.handle(request, response)
 		})
