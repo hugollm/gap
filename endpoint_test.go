@@ -3,26 +3,26 @@ package gap
 import (
 	"encoding/json"
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"io/ioutil"
-	"io"
 )
 
 func TestEndpoint(t *testing.T) {
 
 	t.Run("can be constructed from func with right interface", func(t *testing.T) {
 		defer assertDoesNotPanic(t)
-		type tIn struct {}
-		type tOut struct {}
-		newEndpoint(func (input tIn) (tOut, error) { return tOut{}, nil })
+		type tIn struct{}
+		type tOut struct{}
+		newEndpoint(func(input tIn) (tOut, error) { return tOut{}, nil })
 	})
 
 	t.Run("cannot be constructed from func with wrong interface", func(t *testing.T) {
 
-		type tIn struct {}
-		type tOut struct {}
+		type tIn struct{}
+		type tOut struct{}
 
 		t.Run("wrong number of arguments", func(t *testing.T) {
 			defer assertPanics(t, "endpoint interface must be: func(struct) (struct, error)")
@@ -202,6 +202,26 @@ func TestEndpoint(t *testing.T) {
 			}
 		})
 
+		t.Run("can output reader to body", func(t *testing.T) {
+			type tIn struct{}
+			type tOut struct {
+				Body io.Reader `body:"*"`
+			}
+			fn := func(input tIn) (tOut, error) {
+				body := strings.NewReader("lorem ipsum")
+				return tOut{body}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello", nil)
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+			output := tOut{}
+			json.Unmarshal(response.Body.Bytes(), &output)
+			if response.Body.String() != "lorem ipsum" {
+				t.Error("failed to output reader to body")
+			}
+		})
+
 		t.Run("outputs endpoint error as bad request", func(t *testing.T) {
 			type tIn struct{}
 			type tOut struct{}
@@ -227,7 +247,6 @@ func TestEndpoint(t *testing.T) {
 			type tOut struct{}
 			fn := func(input tIn) (tOut, error) {
 				panic("something went wrong")
-				return tOut{}, nil
 			}
 			ep := newEndpoint(fn)
 			request := httptest.NewRequest("GET", "/hello", nil)

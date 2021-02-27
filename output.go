@@ -1,6 +1,7 @@
 package gap
 
 import (
+	"io"
 	"reflect"
 )
 
@@ -14,6 +15,9 @@ func newOutputField(field reflect.StructField) outputField {
 	}
 	if key, ok := field.Tag.Lookup("json"); ok {
 		return jsonOutput{key}
+	}
+	if _, ok := field.Tag.Lookup("body"); ok {
+		return bodyOutput{}
 	}
 	panic("invalid output field")
 }
@@ -35,4 +39,10 @@ type jsonOutput struct {
 
 func (output jsonOutput) write(response *lazyResponse, value reflect.Value) {
 	response.setJson(output.key, value.Interface())
+}
+
+type bodyOutput struct{}
+
+func (output bodyOutput) write(response *lazyResponse, value reflect.Value) {
+	response.body = value.Interface().(io.Reader)
 }

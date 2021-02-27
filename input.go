@@ -48,7 +48,7 @@ func (input jsonInput) read(request *lazyRequest) reflect.Value {
 	return reflect.ValueOf(request.getJson(input.key))
 }
 
-type bodyInput struct {}
+type bodyInput struct{}
 
 func (input bodyInput) read(request *lazyRequest) reflect.Value {
 	return reflect.ValueOf(request.httpRequest.Body)

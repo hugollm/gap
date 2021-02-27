@@ -2,6 +2,7 @@ package gap
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -11,6 +12,7 @@ type lazyRequest struct {
 	httpRequest *http.Request
 	parsedQuery url.Values
 	parsedJson  map[string]interface{}
+	body        io.Reader
 }
 
 func newLazyRequest(httpRequest *http.Request) *lazyRequest {
@@ -40,6 +42,7 @@ func (request *lazyRequest) getJson(key string) interface{} {
 type lazyResponse struct {
 	httpResponse http.ResponseWriter
 	jsonMap      map[string]interface{}
+	body         io.Reader
 }
 
 func newLazyResponse(httpResponse http.ResponseWriter) *lazyResponse {
@@ -51,10 +54,14 @@ func (response *lazyResponse) setJson(key string, value interface{}) {
 }
 
 func (response *lazyResponse) send(status int) {
+	response.httpResponse.WriteHeader(status)
+	if response.body != nil {
+		io.Copy(response.httpResponse, response.body)
+		return
+	}
 	body, err := json.Marshal(response.jsonMap)
 	if err != nil {
 		panic(err)
 	}
-	response.httpResponse.WriteHeader(status)
 	response.httpResponse.Write(body)
 }
