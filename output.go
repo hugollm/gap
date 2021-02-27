@@ -1,6 +1,7 @@
 package gap
 
 import (
+	"errors"
 	"io"
 	"reflect"
 )
@@ -19,7 +20,7 @@ func newOutputField(field reflect.StructField) outputField {
 	if _, ok := field.Tag.Lookup("body"); ok {
 		return bodyOutput{}
 	}
-	panic("invalid output field")
+	panic(errors.New("missing bind on output field"))
 }
 
 type headerOutput struct {

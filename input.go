@@ -1,6 +1,7 @@
 package gap
 
 import (
+	"errors"
 	"reflect"
 )
 
@@ -21,7 +22,7 @@ func newInputField(field reflect.StructField) inputField {
 	if _, ok := field.Tag.Lookup("body"); ok {
 		return bodyInput{}
 	}
-	panic("invalid input field")
+	panic(errors.New("missing bind on input field"))
 }
 
 type headerInput struct {

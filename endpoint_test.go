@@ -43,6 +43,18 @@ func TestEndpoint(t *testing.T) {
 			defer assertPanics(t, "endpoint interface must be: func(struct) (struct, error)")
 			newEndpoint(func(input tIn) (tOut, string) { return tOut{}, "error" })
 		})
+
+		t.Run("missing bind on input field", func(t *testing.T) {
+			defer assertPanics(t, "missing bind on input field")
+			type tIn struct{ Name string }
+			newEndpoint(func(input tIn) (tOut, error) { return tOut{}, nil })
+		})
+
+		t.Run("missing bind on output field", func(t *testing.T) {
+			defer assertPanics(t, "missing bind on output field")
+			type tOut struct{ Name string }
+			newEndpoint(func(input tIn) (tOut, error) { return tOut{}, nil })
+		})
 	})
 
 	t.Run("handle calls underlying function", func(t *testing.T) {
