@@ -42,19 +42,20 @@ func (request *lazyRequest) getJson(key string) interface{} {
 type lazyResponse struct {
 	httpResponse http.ResponseWriter
 	jsonMap      map[string]interface{}
+	status       int
 	body         io.Reader
 }
 
 func newLazyResponse(httpResponse http.ResponseWriter) *lazyResponse {
-	return &lazyResponse{httpResponse: httpResponse, jsonMap: map[string]interface{}{}}
+	return &lazyResponse{httpResponse: httpResponse, jsonMap: map[string]interface{}{}, status: 200}
 }
 
 func (response *lazyResponse) setJson(key string, value interface{}) {
 	response.jsonMap[key] = value
 }
 
-func (response *lazyResponse) send(status int) {
-	response.httpResponse.WriteHeader(status)
+func (response *lazyResponse) send() {
+	response.httpResponse.WriteHeader(response.status)
 	if response.body != nil {
 		io.Copy(response.httpResponse, response.body)
 		return

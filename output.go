@@ -17,6 +17,9 @@ func newOutputField(field reflect.StructField) outputField {
 	if key, ok := field.Tag.Lookup("json"); ok {
 		return jsonOutput{key}
 	}
+	if _, ok := field.Tag.Lookup("status"); ok {
+		return statusOutput{}
+	}
 	if _, ok := field.Tag.Lookup("body"); ok {
 		return bodyOutput{}
 	}
@@ -40,6 +43,12 @@ type jsonOutput struct {
 
 func (output jsonOutput) write(response *lazyResponse, value reflect.Value) {
 	response.setJson(output.key, value.Interface())
+}
+
+type statusOutput struct{}
+
+func (output statusOutput) write(response *lazyResponse, value reflect.Value) {
+	response.status = value.Interface().(int)
 }
 
 type bodyOutput struct{}

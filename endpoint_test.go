@@ -214,6 +214,23 @@ func TestEndpoint(t *testing.T) {
 			}
 		})
 
+		t.Run("can output to http status", func(t *testing.T) {
+			type tIn struct{}
+			type tOut struct {
+				Status int `status:"*"`
+			}
+			fn := func(input tIn) (tOut, error) {
+				return tOut{201}, nil
+			}
+			ep := newEndpoint(fn)
+			request := httptest.NewRequest("GET", "/hello", nil)
+			response := httptest.NewRecorder()
+			ep.handle(request, response)
+			if response.Code != 201 {
+				t.Error("failed to output http status")
+			}
+		})
+
 		t.Run("can output reader to body", func(t *testing.T) {
 			type tIn struct{}
 			type tOut struct {

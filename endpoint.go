@@ -86,9 +86,10 @@ func (ep *endpoint) writeOutput(httpResponse http.ResponseWriter, result []refle
 		for name, field := range ep.outFields {
 			field.write(response, output.FieldByName(name))
 		}
-		response.send(200)
+		response.send()
 	} else {
+		response.status = 400
 		response.setJson("error", outErr.Interface().(error).Error())
-		response.send(400)
+		response.send()
 	}
 }
