@@ -11,17 +11,17 @@ import (
 
 func TestApi(t *testing.T) {
 
-	api := New()
-	api.Route("GET", "/profiles/read", readProfile)
+	app := New()
+	app.Route("GET", "/profiles/read", readProfile)
 
 	t.Run("implements http handler", func(t *testing.T) {
-		httptest.NewServer(api)
+		httptest.NewServer(app)
 	})
 
 	t.Run("invalid route responds not found", func(t *testing.T) {
 		request := httptest.NewRequest("GET", "/hello", nil)
 		response := httptest.NewRecorder()
-		api.ServeHTTP(response, request)
+		app.ServeHTTP(response, request)
 		if response.Result().StatusCode != 404 {
 			t.Errorf("failed to set status code to 404")
 		}
@@ -36,7 +36,7 @@ func TestApi(t *testing.T) {
 	t.Run("valid route with wrong method responds method not allowed", func(t *testing.T) {
 		request := httptest.NewRequest("POST", "/profiles/read", nil)
 		response := httptest.NewRecorder()
-		api.ServeHTTP(response, request)
+		app.ServeHTTP(response, request)
 		if response.Result().StatusCode != 405 {
 			t.Errorf("failed to set status code to 405")
 		}
@@ -51,7 +51,7 @@ func TestApi(t *testing.T) {
 	t.Run("invalid json is answered with bad request", func(t *testing.T) {
 		request := httptest.NewRequest("GET", "/profiles/read", nil)
 		response := httptest.NewRecorder()
-		api.ServeHTTP(response, request)
+		app.ServeHTTP(response, request)
 		if response.Result().StatusCode != 400 {
 			t.Errorf("failed to set status code to 400")
 		}
@@ -68,7 +68,7 @@ func TestApi(t *testing.T) {
 		request := httptest.NewRequest("GET", "/profiles/read", requestBody)
 		request.Header.Set("auth", "api-token")
 		response := httptest.NewRecorder()
-		api.ServeHTTP(response, request)
+		app.ServeHTTP(response, request)
 		if response.Result().StatusCode != 200 {
 			t.Errorf("failed to set status code to 200")
 		}

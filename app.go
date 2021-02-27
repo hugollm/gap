@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type api struct {
+type App struct {
 	routes map[string]route
 }
 
@@ -20,21 +20,21 @@ type errorResponse struct {
 	body   interface{}
 }
 
-func New() *api {
-	return &api{routes: map[string]route{}}
+func New() *App {
+	return &App{routes: map[string]route{}}
 }
 
 func Response(status int, body interface{}) errorResponse {
 	return errorResponse{status, body}
 }
 
-func (api *api) Route(method string, path string, fn interface{}) {
-	api.routes[path] = route{method, newEndpoint(fn)}
+func (app *App) Route(method string, path string, fn interface{}) {
+	app.routes[path] = route{method, newEndpoint(fn)}
 }
 
-func (api *api) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+func (app *App) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	defer writeErrorOnPanic(response)
-	route, found := api.routes[request.URL.Path]
+	route, found := app.routes[request.URL.Path]
 	if !found {
 		writeNotFound(response)
 		return
