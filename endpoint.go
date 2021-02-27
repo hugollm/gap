@@ -89,7 +89,29 @@ func (ep *endpoint) writeOutput(httpResponse http.ResponseWriter, result []refle
 		response.send()
 	} else {
 		response.status = 400
-		response.setJson("error", outErr.Interface().(error).Error())
+		err := outErr.Interface().(error)
+		outErr = reflect.ValueOf(err)
+		errFields := getErrorFields(err)
+		if errFields != nil {
+			for name, field := range errFields {
+				field.write(response, outErr.FieldByName(name))
+			}
+		} else {
+			response.setJson("error", outErr.Interface().(error).Error())
+		}
 		response.send()
 	}
+}
+
+func getErrorFields(err error) map[string]outputField {
+	rtype := reflect.TypeOf(err)
+	if rtype.Kind() != reflect.Struct {
+		return nil
+	}
+	errFields := map[string]outputField{}
+	for i := 0; i < rtype.NumField(); i++ {
+		field := rtype.Field(i)
+		errFields[field.Name] = newOutputField(field)
+	}
+	return errFields
 }
