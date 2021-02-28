@@ -2,7 +2,6 @@ package gap
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"reflect"
 )
@@ -51,22 +50,9 @@ func (ep *endpoint) setupOutputFields() {
 }
 
 func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) {
-	defer writeServerErrorOnPanic(response)
 	input := ep.readInput(request)
 	result := ep.rval.Call([]reflect.Value{input})
 	ep.writeOutput(response, result)
-}
-
-func writeServerErrorOnPanic(response http.ResponseWriter) {
-	ierr := recover()
-	if ierr != nil {
-		if resp, ok := ierr.(errorResponse); ok {
-			panic(resp)
-		}
-		fmt.Printf("PANIC: %s\n", ierr)
-		response.WriteHeader(500)
-		response.Write([]byte(`{"error":"server error"}`))
-	}
 }
 
 func (ep *endpoint) readInput(httpRequest *http.Request) reflect.Value {

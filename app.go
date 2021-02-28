@@ -2,13 +2,13 @@ package gap
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 )
 
 type App struct {
-	routes map[string]route
+	routes       map[string]route
+	errorHandler func(interface{}, http.ResponseWriter)
 }
 
 type route struct {
@@ -22,7 +22,17 @@ type errorResponse struct {
 }
 
 func New() *App {
-	return &App{routes: map[string]route{}}
+	return &App{
+		routes:       map[string]route{},
+		errorHandler: defaultErrorHandler,
+	}
+}
+
+func defaultErrorHandler(ierr interface{}, response http.ResponseWriter) {
+	log.Print("PANIC: ", ierr)
+	response.Header().Set("Content-Type", "application/json")
+	response.WriteHeader(500)
+	response.Write([]byte(`{"error": "internal server error"}\n`))
 }
 
 func Response(status int, body interface{}) errorResponse {
@@ -33,8 +43,12 @@ func (app *App) Route(method string, path string, fn interface{}) {
 	app.routes[path] = route{method, newEndpoint(fn)}
 }
 
+func (app *App) ErrorHandler(handler func(interface{}, http.ResponseWriter)) {
+	app.errorHandler = handler
+}
+
 func (app *App) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	defer writeErrorOnPanic(response)
+	defer writeErrorOnPanic(response, app.errorHandler)
 	route, found := app.routes[request.URL.Path]
 	if !found {
 		writeNotFound(response)
@@ -61,7 +75,7 @@ func writeMethodNotAllowed(response http.ResponseWriter) {
 	response.Write([]byte(`{"error":"method not allowed"}`))
 }
 
-func writeErrorOnPanic(httpResponse http.ResponseWriter) {
+func writeErrorOnPanic(httpResponse http.ResponseWriter, errorHandler func(interface{}, http.ResponseWriter)) {
 	ierr := recover()
 	if ierr != nil {
 		if resp, ok := ierr.(errorResponse); ok {
@@ -72,9 +86,7 @@ func writeErrorOnPanic(httpResponse http.ResponseWriter) {
 			httpResponse.WriteHeader(resp.status)
 			httpResponse.Write(body)
 		} else {
-			fmt.Printf("PANIC: %s", ierr)
-			httpResponse.WriteHeader(500)
-			httpResponse.Write([]byte(`{"error":"server error"}`))
+			errorHandler(ierr, httpResponse)
 		}
 	}
 }

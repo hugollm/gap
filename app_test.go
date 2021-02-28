@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 )
 
-func TestApi(t *testing.T) {
+func TestApp(t *testing.T) {
 
 	app := New()
 	app.Route("GET", "/profiles/read", readProfile)
@@ -78,6 +81,69 @@ func TestApi(t *testing.T) {
 		if out.Id != 1 || out.Email != "johndoe@example.org" {
 			t.Errorf("failed to set json body")
 		}
+	})
+
+	t.Run("error handler", func(t *testing.T) {
+
+		t.Run("default error handler logs panic message", func(t *testing.T) {
+			defer func() {
+				log.SetOutput(os.Stderr)
+			}()
+			logOutput := &strings.Builder{}
+			log.SetOutput(logOutput)
+			type tIn struct{}
+			type tOut struct{}
+			panicEndpoint := func(input tIn) (tOut, error) { panic("something went wrong") }
+			app := New()
+			app.Route("GET", "/panic", panicEndpoint)
+			request := httptest.NewRequest("GET", "/panic", nil)
+			response := httptest.NewRecorder()
+			app.ServeHTTP(response, request)
+			if !strings.Contains(logOutput.String(), "PANIC: something went wrong") {
+				t.Error("failed to log panic message")
+			}
+		})
+
+		t.Run("default error handler writes 500 response with json", func(t *testing.T) {
+			defer func() {
+				log.SetOutput(os.Stderr)
+			}()
+			log.SetOutput(ioutil.Discard)
+			type tIn struct{}
+			type tOut struct{}
+			panicEndpoint := func(input tIn) (tOut, error) { panic("something went wrong") }
+			app := New()
+			app.Route("GET", "/panic", panicEndpoint)
+			request := httptest.NewRequest("GET", "/panic", nil)
+			response := httptest.NewRecorder()
+			app.ServeHTTP(response, request)
+			if response.Code != 500 {
+				t.Error("failed to set http status")
+			}
+			if response.Header().Get("content-type") != "application/json" {
+				t.Error("failed to set content-type header")
+			}
+			if response.Body.String() != `{"error": "internal server error"}\n` {
+				t.Error("failed to set json body")
+			}
+		})
+
+		t.Run("app can configure a different error handler", func(t *testing.T) {
+			msg := ""
+			type tIn struct{}
+			type tOut struct{}
+			panicEndpoint := func(input tIn) (tOut, error) { panic("something went wrong") }
+			errorHandler := func(ierr interface{}, response http.ResponseWriter) { msg = ierr.(string) }
+			app := New()
+			app.Route("GET", "/panic", panicEndpoint)
+			app.ErrorHandler(errorHandler)
+			request := httptest.NewRequest("GET", "/panic", nil)
+			response := httptest.NewRecorder()
+			app.ServeHTTP(response, request)
+			if msg != "something went wrong" {
+				t.Error("failed to handle panic")
+			}
+		})
 	})
 }
 
