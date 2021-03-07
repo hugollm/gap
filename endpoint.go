@@ -67,36 +67,33 @@ func (ep *endpoint) readInput(httpRequest *http.Request) reflect.Value {
 
 func (ep *endpoint) writeOutput(httpResponse http.ResponseWriter, result []reflect.Value) {
 	response := newLazyResponse(httpResponse)
-	output, outErr := result[0], result[1]
-	if outErr.IsZero() {
+	rvOut, rvErr := result[0], result[1]
+	if rvErr.IsNil() {
 		for name, field := range ep.outFields {
-			field.write(response, output.FieldByName(name))
+			field.write(response, rvOut.FieldByName(name))
 		}
-		response.send()
 	} else {
 		response.status = 400
-		err := outErr.Interface().(error)
-		outErr = reflect.ValueOf(err)
-		errFields := getErrorFields(err)
+		errFields := getErrorFields(rvErr)
 		if errFields != nil {
 			for name, field := range errFields {
-				field.write(response, outErr.FieldByName(name))
+				field.write(response, rvErr.Elem().FieldByName(name))
 			}
 		} else {
-			response.setJson("error", outErr.Interface().(error).Error())
+			response.setJson("error", rvErr.Interface().(error).Error())
 		}
-		response.send()
 	}
+	response.send()
 }
 
-func getErrorFields(err error) map[string]outputField {
-	rtype := reflect.TypeOf(err)
-	if rtype.Kind() != reflect.Struct {
+func getErrorFields(rvErr reflect.Value) map[string]outputField {
+	rtErr := rvErr.Elem().Type()
+	if rtErr.Kind() != reflect.Struct {
 		return nil
 	}
 	errFields := map[string]outputField{}
-	for i := 0; i < rtype.NumField(); i++ {
-		field := rtype.Field(i)
+	for i := 0; i < rtErr.NumField(); i++ {
+		field := rtErr.Field(i)
 		errFields[field.Name] = newOutputField(field)
 	}
 	return errFields
