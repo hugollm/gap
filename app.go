@@ -1,7 +1,6 @@
 package gap
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -16,11 +15,6 @@ type route struct {
 	endpoint endpoint
 }
 
-type errorResponse struct {
-	status int
-	body   interface{}
-}
-
 func New() *App {
 	return &App{
 		routes:       map[string]route{},
@@ -33,10 +27,6 @@ func defaultErrorHandler(ierr interface{}, response http.ResponseWriter) {
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(500)
 	response.Write([]byte(`{"error": "internal server error"}\n`))
-}
-
-func Response(status int, body interface{}) errorResponse {
-	return errorResponse{status, body}
 }
 
 func (app *App) Route(method string, path string, fn interface{}) {
@@ -78,15 +68,6 @@ func writeMethodNotAllowed(response http.ResponseWriter) {
 func writeErrorOnPanic(httpResponse http.ResponseWriter, errorHandler func(interface{}, http.ResponseWriter)) {
 	ierr := recover()
 	if ierr != nil {
-		if resp, ok := ierr.(errorResponse); ok {
-			body, err := json.Marshal(resp.body)
-			if err != nil {
-				panic(err)
-			}
-			httpResponse.WriteHeader(resp.status)
-			httpResponse.Write(body)
-		} else {
-			errorHandler(ierr, httpResponse)
-		}
+		errorHandler(ierr, httpResponse)
 	}
 }

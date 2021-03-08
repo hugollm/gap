@@ -15,6 +15,15 @@ type lazyRequest struct {
 	body        io.Reader
 }
 
+type requestError struct {
+	Status  int    `response:"status"`
+	Message string `response:"json,error"`
+}
+
+func (err requestError) Error() string {
+	return err.Message
+}
+
 func newLazyRequest(httpRequest *http.Request) *lazyRequest {
 	return &lazyRequest{httpRequest: httpRequest}
 }
@@ -33,7 +42,7 @@ func (request *lazyRequest) getJson(key string) interface{} {
 			panic(err)
 		}
 		if err := json.Unmarshal(body, &request.parsedJson); err != nil {
-			panic(Response(400, map[string]string{"error": "invalid json"}))
+			panic(requestError{400, "invalid json"})
 		}
 	}
 	return request.parsedJson[key]
