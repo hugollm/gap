@@ -140,4 +140,22 @@ func TestOutput(t *testing.T) {
 			t.Error("failed to output json body with message")
 		}
 	})
+
+	t.Run("empty spaces are ignored on tag values", func(t *testing.T) {
+		type tIn struct{}
+		type tOut struct {
+			ContentType string `response:"header, content-type "`
+		}
+		fn := func(input tIn) (tOut, error) {
+			return tOut{"image/jpeg"}, nil
+		}
+		ep := newEndpoint(fn)
+		request := httptest.NewRequest("POST", "/post", nil)
+		request.Header.Set("content-type", "application/json")
+		response := httptest.NewRecorder()
+		ep.handle(request, response)
+		if response.Header().Get("content-type") != "image/jpeg" {
+			t.Error("failed to output content-type header")
+		}
+	})
 }

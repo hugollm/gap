@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"reflect"
-	"strings"
 )
 
 type outputField interface {
@@ -12,7 +11,7 @@ type outputField interface {
 }
 
 func newOutputField(field reflect.StructField) outputField {
-	tagParts := strings.Split(field.Tag.Get("response"), ",")
+	tagParts := splitTag(field.Tag.Get("response"))
 	if len(tagParts) == 2 && tagParts[0] == "header" {
 		return headerOutput{tagParts[1]}
 	}

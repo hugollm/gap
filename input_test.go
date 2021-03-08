@@ -103,4 +103,22 @@ func TestInput(t *testing.T) {
 		response := httptest.NewRecorder()
 		ep.handle(request, response)
 	})
+
+	t.Run("empty spaces are ignored on tag values", func(t *testing.T) {
+		type tIn struct {
+			ContentType string `request:"header, content-type "`
+		}
+		type tOut struct{}
+		fn := func(input tIn) (tOut, error) {
+			if input.ContentType != "application/json" {
+				t.Error("failed to input content-type header")
+			}
+			return tOut{}, nil
+		}
+		ep := newEndpoint(fn)
+		request := httptest.NewRequest("POST", "/post", nil)
+		request.Header.Set("content-type", "application/json")
+		response := httptest.NewRecorder()
+		ep.handle(request, response)
+	})
 }
