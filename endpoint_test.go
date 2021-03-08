@@ -40,13 +40,13 @@ func TestEndpoint(t *testing.T) {
 		})
 
 		t.Run("missing bind on input field", func(t *testing.T) {
-			defer assertPanics(t, "missing bind on input field")
+			defer assertPanics(t, "missing or invalid request tag on input field")
 			type tIn struct{ Name string }
 			newEndpoint(func(input tIn) (tOut, error) { return tOut{}, nil })
 		})
 
 		t.Run("missing bind on output field", func(t *testing.T) {
-			defer assertPanics(t, "missing bind on output field")
+			defer assertPanics(t, "missing or invalid response tag on output field")
 			type tOut struct{ Name string }
 			newEndpoint(func(input tIn) (tOut, error) { return tOut{}, nil })
 		})

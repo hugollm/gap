@@ -10,8 +10,8 @@ import (
 )
 
 type tErr struct {
-	Status  int    `status:"*"`
-	Message string `json:"message"`
+	Status  int    `response:"status"`
+	Message string `response:"json,message"`
 }
 
 func (err tErr) Error() string {
@@ -23,8 +23,8 @@ func TestOutput(t *testing.T) {
 	t.Run("can output to headers", func(t *testing.T) {
 		type tIn struct{}
 		type tOut struct {
-			ContentType  string `header:"Content-Type"`
-			CacheControl string `header:"Cache-Control"`
+			ContentType  string `response:"header,Content-Type"`
+			CacheControl string `response:"header,Cache-Control"`
 		}
 		fn := func(input tIn) (tOut, error) {
 			return tOut{"application/json", "no-cache"}, nil
@@ -44,8 +44,8 @@ func TestOutput(t *testing.T) {
 	t.Run("can output to json", func(t *testing.T) {
 		type tIn struct{}
 		type tOut struct {
-			Title  string `json:"title"`
-			Public bool   `json:"public"`
+			Title  string `response:"json,title"`
+			Public bool   `response:"json,public"`
 		}
 		fn := func(input tIn) (tOut, error) {
 			return tOut{"lorem ipsum", true}, nil
@@ -64,7 +64,7 @@ func TestOutput(t *testing.T) {
 	t.Run("can output to http status", func(t *testing.T) {
 		type tIn struct{}
 		type tOut struct {
-			Status int `status:"*"`
+			Status int `response:"status"`
 		}
 		fn := func(input tIn) (tOut, error) {
 			return tOut{201}, nil
@@ -81,7 +81,7 @@ func TestOutput(t *testing.T) {
 	t.Run("can output reader to body", func(t *testing.T) {
 		type tIn struct{}
 		type tOut struct {
-			Body io.Reader `body:"*"`
+			Body io.Reader `response:"body"`
 		}
 		fn := func(input tIn) (tOut, error) {
 			body := strings.NewReader("lorem ipsum")

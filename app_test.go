@@ -148,13 +148,13 @@ func TestApp(t *testing.T) {
 }
 
 type readProfileInput struct {
-	Auth      string `header:"auth"`
-	ProfileId int    `json:"profile_id"`
+	Auth      string `request:"header,auth"`
+	ProfileId int    `request:"json,profile_id"`
 }
 
 type readProfileOutput struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
+	Id    int    `response:"json,id"`
+	Email string `response:"json,email"`
 }
 
 func readProfile(input readProfileInput) (readProfileOutput, error) {

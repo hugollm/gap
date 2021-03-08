@@ -3,6 +3,7 @@ package gap
 import (
 	"errors"
 	"reflect"
+	"strings"
 )
 
 type inputField interface {
@@ -10,19 +11,20 @@ type inputField interface {
 }
 
 func newInputField(field reflect.StructField) inputField {
-	if key, ok := field.Tag.Lookup("header"); ok {
-		return headerInput{key}
+	tagParts := strings.Split(field.Tag.Get("request"), ",")
+	if len(tagParts) == 2 && tagParts[0] == "header" {
+		return headerInput{tagParts[1]}
 	}
-	if key, ok := field.Tag.Lookup("query"); ok {
-		return queryInput{key}
+	if len(tagParts) == 2 && tagParts[0] == "query" {
+		return queryInput{tagParts[1]}
 	}
-	if key, ok := field.Tag.Lookup("json"); ok {
-		return jsonInput{key}
+	if len(tagParts) == 2 && tagParts[0] == "json" {
+		return jsonInput{tagParts[1]}
 	}
-	if _, ok := field.Tag.Lookup("body"); ok {
+	if len(tagParts) == 1 && tagParts[0] == "body" {
 		return bodyInput{}
 	}
-	panic(errors.New("missing bind on input field"))
+	panic(errors.New("missing or invalid request tag on input field"))
 }
 
 type headerInput struct {

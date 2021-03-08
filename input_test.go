@@ -12,8 +12,8 @@ func TestInput(t *testing.T) {
 
 	t.Run("can get input from headers", func(t *testing.T) {
 		type tIn struct {
-			Auth        string `header:"authorization"`
-			ContentType string `header:"content-type"`
+			Auth        string `request:"header,authorization"`
+			ContentType string `request:"header,content-type"`
 		}
 		type tOut struct{}
 		fn := func(input tIn) (tOut, error) {
@@ -32,8 +32,8 @@ func TestInput(t *testing.T) {
 
 	t.Run("can get input from query string", func(t *testing.T) {
 		type tIn struct {
-			Limit string `query:"limit"`
-			Page  string `query:"page"`
+			Limit string `request:"query,limit"`
+			Page  string `request:"query,page"`
 		}
 		type tOut struct{}
 		fn := func(input tIn) (tOut, error) {
@@ -50,8 +50,8 @@ func TestInput(t *testing.T) {
 
 	t.Run("can get input from json body", func(t *testing.T) {
 		type tIn struct {
-			Title  string `json:"title"`
-			Public bool   `json:"public"`
+			Title  string `request:"json,title"`
+			Public bool   `request:"json,public"`
 		}
 		type tOut struct{}
 		fn := func(input tIn) (tOut, error) {
@@ -68,9 +68,9 @@ func TestInput(t *testing.T) {
 
 	t.Run("can get input from multiple sources with the same name", func(t *testing.T) {
 		type tIn struct {
-			HeaderAuth string `header:"auth"`
-			QueryAuth  string `query:"auth"`
-			JsonAuth   string `json:"auth"`
+			HeaderAuth string `request:"header,auth"`
+			QueryAuth  string `request:"query,auth"`
+			JsonAuth   string `request:"json,auth"`
 		}
 		type tOut struct{}
 		fn := func(input tIn) (tOut, error) {
@@ -88,7 +88,7 @@ func TestInput(t *testing.T) {
 
 	t.Run("can get whole request body as input", func(t *testing.T) {
 		type tIn struct {
-			Body io.Reader `body:"*"`
+			Body io.Reader `request:"body"`
 		}
 		type tOut struct{}
 		fn := func(input tIn) (tOut, error) {

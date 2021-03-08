@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"reflect"
+	"strings"
 )
 
 type outputField interface {
@@ -11,19 +12,20 @@ type outputField interface {
 }
 
 func newOutputField(field reflect.StructField) outputField {
-	if key, ok := field.Tag.Lookup("header"); ok {
-		return headerOutput{key}
+	tagParts := strings.Split(field.Tag.Get("response"), ",")
+	if len(tagParts) == 2 && tagParts[0] == "header" {
+		return headerOutput{tagParts[1]}
 	}
-	if key, ok := field.Tag.Lookup("json"); ok {
-		return jsonOutput{key}
+	if len(tagParts) == 2 && tagParts[0] == "json" {
+		return jsonOutput{tagParts[1]}
 	}
-	if _, ok := field.Tag.Lookup("status"); ok {
+	if len(tagParts) == 1 && tagParts[0] == "status" {
 		return statusOutput{}
 	}
-	if _, ok := field.Tag.Lookup("body"); ok {
+	if len(tagParts) == 1 && tagParts[0] == "body" {
 		return bodyOutput{}
 	}
-	panic(errors.New("missing bind on output field"))
+	panic(errors.New("missing or invalid response tag on output field"))
 }
 
 type headerOutput struct {
