@@ -158,4 +158,25 @@ func TestOutput(t *testing.T) {
 			t.Error("failed to output content-type header")
 		}
 	})
+
+	t.Run("endpoint can panic an error output struct as response", func(t *testing.T) {
+		defer assertDoesNotPanic(t)
+		type tIn struct{}
+		type tOut struct{}
+		fn := func(input tIn) (tOut, error) {
+			panic(tErr{401, "auth error"})
+		}
+		ep := newEndpoint(fn)
+		request := httptest.NewRequest("GET", "/hello", nil)
+		response := httptest.NewRecorder()
+		ep.handle(request, response)
+		output := map[string]string{}
+		json.Unmarshal(response.Body.Bytes(), &output)
+		if response.Result().StatusCode != 401 {
+			t.Error("failed to set status code")
+		}
+		if len(output) != 1 || output["message"] != "auth error" {
+			t.Error("failed to output json body with message")
+		}
+	})
 }

@@ -7,7 +7,7 @@ import (
 func assertDoesNotPanic(t *testing.T) {
 	err := recover()
 	if err != nil {
-		t.Errorf("did panic")
+		t.Errorf("did panic: %s", err)
 	}
 }
 

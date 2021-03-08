@@ -49,10 +49,11 @@ func (ep *endpoint) setupOutputFields() {
 	}
 }
 
-func (ep *endpoint) handle(request *http.Request, response http.ResponseWriter) {
+func (ep *endpoint) handle(request *http.Request, httpResponse http.ResponseWriter) {
+	defer ep.writeErrorOnPanic(httpResponse)
 	input := ep.readInput(request)
 	result := ep.rval.Call([]reflect.Value{input})
-	ep.writeOutput(response, result)
+	ep.writeResponse(httpResponse, result)
 }
 
 func (ep *endpoint) readInput(httpRequest *http.Request) reflect.Value {
@@ -65,29 +66,39 @@ func (ep *endpoint) readInput(httpRequest *http.Request) reflect.Value {
 	return input
 }
 
-func (ep *endpoint) writeOutput(httpResponse http.ResponseWriter, result []reflect.Value) {
-	response := newLazyResponse(httpResponse)
+func (ep *endpoint) writeResponse(httpResponse http.ResponseWriter, result []reflect.Value) {
 	rvOut, rvErr := result[0], result[1]
 	if rvErr.IsNil() {
-		for name, field := range ep.outFields {
-			field.write(response, rvOut.FieldByName(name))
+		ep.writeOutput(httpResponse, rvOut)
+	} else {
+		ep.writeError(httpResponse, rvErr.Elem())
+	}
+}
+
+func (ep *endpoint) writeOutput(httpResponse http.ResponseWriter, rvOut reflect.Value) {
+	response := newLazyResponse(httpResponse)
+	for name, field := range ep.outFields {
+		field.write(response, rvOut.FieldByName(name))
+	}
+	response.send()
+}
+
+func (ep *endpoint) writeError(httpResponse http.ResponseWriter, rvErr reflect.Value) {
+	response := newLazyResponse(httpResponse)
+	response.status = 400
+	errFields := getErrorFields(rvErr)
+	if errFields != nil {
+		for name, field := range errFields {
+			field.write(response, rvErr.FieldByName(name))
 		}
 	} else {
-		response.status = 400
-		errFields := getErrorFields(rvErr)
-		if errFields != nil {
-			for name, field := range errFields {
-				field.write(response, rvErr.Elem().FieldByName(name))
-			}
-		} else {
-			response.setJson("error", rvErr.Interface().(error).Error())
-		}
+		response.setJson("error", rvErr.Interface().(error).Error())
 	}
 	response.send()
 }
 
 func getErrorFields(rvErr reflect.Value) map[string]outputField {
-	rtErr := rvErr.Elem().Type()
+	rtErr := rvErr.Type()
 	if rtErr.Kind() != reflect.Struct {
 		return nil
 	}
@@ -97,4 +108,30 @@ func getErrorFields(rvErr reflect.Value) map[string]outputField {
 		errFields[field.Name] = newOutputField(field)
 	}
 	return errFields
+}
+
+func (ep *endpoint) writeErrorOnPanic(httpResponse http.ResponseWriter) {
+	ierr := recover()
+	if ierr != nil {
+		rvErr := reflect.ValueOf(ierr)
+		if isOutputStruct(rvErr) {
+			ep.writeError(httpResponse, rvErr)
+		} else {
+			panic(ierr)
+		}
+	}
+}
+
+func isOutputStruct(rvStruct reflect.Value) bool {
+	rtStruct := rvStruct.Type()
+	if rtStruct.Kind() != reflect.Struct {
+		return false
+	}
+	for i := 0; i < rtStruct.NumField(); i++ {
+		field := rtStruct.Field(i)
+		if field.Tag.Get("response") != "" {
+			return true
+		}
+	}
+	return false
 }
