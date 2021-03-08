@@ -56,6 +56,9 @@ func TestOutput(t *testing.T) {
 		ep.handle(request, response)
 		output := tOut{}
 		json.Unmarshal(response.Body.Bytes(), &output)
+		if response.Header().Get("content-type") != "application/json" {
+			t.Error("failed to set content-type header")
+		}
 		if output.Title != "lorem ipsum" || output.Public != true {
 			t.Error("failed to output json body")
 		}
