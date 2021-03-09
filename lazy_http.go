@@ -56,10 +56,13 @@ type lazyResponse struct {
 }
 
 func newLazyResponse(httpResponse http.ResponseWriter) *lazyResponse {
-	return &lazyResponse{httpResponse: httpResponse, jsonMap: map[string]interface{}{}, status: 200}
+	return &lazyResponse{httpResponse: httpResponse, status: 200}
 }
 
 func (response *lazyResponse) setJson(key string, value interface{}) {
+	if response.jsonMap == nil {
+		response.jsonMap = map[string]interface{}{}
+	}
 	response.jsonMap[key] = value
 }
 
@@ -69,9 +72,11 @@ func (response *lazyResponse) send() {
 		io.Copy(response.httpResponse, response.body)
 		return
 	}
-	body, err := json.Marshal(response.jsonMap)
-	if err != nil {
-		panic(err)
+	if response.jsonMap != nil {
+		body, err := json.Marshal(response.jsonMap)
+		if err != nil {
+			panic(err)
+		}
+		response.httpResponse.Write(body)
 	}
-	response.httpResponse.Write(body)
 }
