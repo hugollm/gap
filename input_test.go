@@ -30,6 +30,21 @@ func TestInput(t *testing.T) {
 		ep.handle(request, response)
 	})
 
+	t.Run("can get input from whole path", func(t *testing.T) {
+		type tIn struct {
+			Path string `request:"path"`
+		}
+		fn := func(input tIn) {
+			if input.Path != "/hello/world" {
+				t.Errorf("failed to fetch path as input: %s", input.Path)
+			}
+		}
+		ep := newEndpoint(fn)
+		request := httptest.NewRequest("GET", "/hello/world?q=query", nil)
+		response := httptest.NewRecorder()
+		ep.handle(request, response)
+	})
+
 	t.Run("can get input from query string", func(t *testing.T) {
 		type tIn struct {
 			Limit string `request:"query,limit"`

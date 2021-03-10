@@ -15,6 +15,9 @@ func newInputField(field reflect.StructField) inputField {
 	if len(tagParts) == 2 && tagParts[0] == "header" {
 		return headerInput{tagParts[1]}
 	}
+	if len(tagParts) == 1 && tagParts[0] == "path" {
+		return pathInput{}
+	}
 	if len(tagParts) == 2 && tagParts[0] == "query" {
 		return queryInput{tagParts[1]}
 	}
@@ -41,6 +44,12 @@ type headerInput struct {
 
 func (input headerInput) read(request *lazyRequest) reflect.Value {
 	return reflect.ValueOf(request.httpRequest.Header.Get(input.key))
+}
+
+type pathInput struct{}
+
+func (input pathInput) read(request *lazyRequest) reflect.Value {
+	return reflect.ValueOf(request.httpRequest.URL.Path)
 }
 
 type queryInput struct {
