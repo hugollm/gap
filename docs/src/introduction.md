@@ -22,11 +22,11 @@ And here's the endpoint code:
 
 ```go
 type helloInput struct {
-    UserAgent string `header:"user-agent"`
+    UserAgent string `request:"header,user-agent"`
 }
 
 type helloOutput struct {
-    Message string `json:"message"`
+    Message string `response:"json,message"`
 }
 
 func helloEndpoint(input helloInput) (helloOutput, error) {
