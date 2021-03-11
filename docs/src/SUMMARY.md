@@ -2,7 +2,7 @@
 - [App](./app.md)
 - [Endpoints](./endpoints.md)
     - [Input](./input.md)
-    - [Output]()
+    - [Output](./output.md)
     - [Error]()
     - [Panic]()
 - [Testing]()
