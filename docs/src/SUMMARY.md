@@ -1,6 +1,6 @@
 [Introduction](./introduction.md)
 - [App](./app.md)
-- [Endpoints]()
+- [Endpoints](./endpoints.md)
     - [Input]()
     - [Output]()
     - [Error]()
