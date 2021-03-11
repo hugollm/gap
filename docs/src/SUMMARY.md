@@ -3,6 +3,6 @@
 - [Endpoints](./endpoints.md)
     - [Input](./input.md)
     - [Output](./output.md)
-    - [Error]()
+    - [Error](./error.md)
     - [Panic]()
 - [Testing]()
