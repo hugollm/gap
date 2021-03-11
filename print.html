@@ -1,0 +1,575 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title></title>
+        
+        <meta name="robots" content="noindex" />
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="app.html"><strong aria-hidden="true">1.</strong> App</a></li><li class="chapter-item expanded "><a href="endpoints.html"><strong aria-hidden="true">2.</strong> Endpoints</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="input.html"><strong aria-hidden="true">2.1.</strong> Input</a></li><li class="chapter-item expanded "><a href="output.html"><strong aria-hidden="true">2.2.</strong> Output</a></li><li class="chapter-item expanded "><a href="error.html"><strong aria-hidden="true">2.3.</strong> Error</a></li><li class="chapter-item expanded "><a href="panic.html"><strong aria-hidden="true">2.4.</strong> Panic</a></li></ol></li><li class="chapter-item expanded "><a href="testing.html"><strong aria-hidden="true">3.</strong> Testing</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="gap"><a class="header" href="#gap">Gap</a></h1>
+<p>Gap is a web framework aimed at removing HTTP boilerplate from your application.</p>
+<p>Here's a minimal example of an application with one endpoint:</p>
+<pre><code class="language-go">package main
+
+import (
+    &quot;github.com/hugollm/gap&quot;
+)
+
+func main() {
+    app := gap.New()
+    app.Route(&quot;GET&quot;, &quot;/&quot;, helloEndpoint)
+    app.Run()
+}
+</code></pre>
+<p>And here's the endpoint code:</p>
+<pre><code class="language-go">type helloInput struct {
+    UserAgent string `request:&quot;header,user-agent&quot;`
+}
+
+type helloOutput struct {
+    Message string `response:&quot;json,message&quot;`
+}
+
+func helloEndpoint(input helloInput) (helloOutput, error) {
+    return helloOutput{&quot;hello &quot; + input.UserAgent}, nil
+}
+</code></pre>
+<p>This endpoint gets the <code>User-Agent</code> header from the request and outputs a hello message on the response body as JSON.</p>
+<pre><code class="language-json">GET /
+User-Agent: golang
+---
+200 {&quot;message&quot;: &quot;hello golang&quot;}
+</code></pre>
+<p>Note how the endpoint is a &quot;pure&quot; function that <strong>does not depend on the framework</strong>.
+Tag annotations bind inputs and outputs to requests and responses.
+This makes it much easier to write and test your app!</p>
+<h1 id="app"><a class="header" href="#app">App</a></h1>
+<p>The <code>App</code> struct is the main glue that holds your application together. It contains your endpoints and runs your API. Here's a minimal example of the simplest app you can run:</p>
+<pre><code class="language-go">package main
+
+import (
+    &quot;github.com/hugollm/gap&quot;
+)
+
+func main() {
+    app := gap.New()
+    app.Run()
+}
+</code></pre>
+<p>The method <code>Run</code> is a shorcut that listens on <code>localhost:8000</code>. Since there's no endpoints on this app, it will just answer 404 for all requests. We cover endpoints next on this guide.</p>
+<p>When running on production you might want to have more control over the server. <code>App</code> implements the <a href="https://golang.org/pkg/net/http/#Handler">http.Handler</a> interface. This means you can seamlessly use it with go's native web server:</p>
+<pre><code class="language-go">package main
+
+import (
+    &quot;net/http&quot;
+    &quot;github.com/hugollm/gap&quot;
+)
+
+func main() {
+    app := gap.New()
+    http.ListenAndServe(&quot;:8000&quot;, app)
+}
+</code></pre>
+<p>Or with even more configuration:</p>
+<pre><code class="language-go">package main
+
+import (
+    &quot;net/http&quot;
+    &quot;time&quot;
+    &quot;github.com/hugollm/gap&quot;
+)
+
+func main() {
+    app := gap.New()
+    server := &amp;http.Server{
+        Addr:           &quot;:8000&quot;,
+        Handler:        app,
+        ReadTimeout:    10 * time.Second,
+        WriteTimeout:   10 * time.Second,
+        MaxHeaderBytes: 10 * 1024,
+    }
+    server.ListenAndServe()
+}
+</code></pre>
+<h1 id="endpoints"><a class="header" href="#endpoints">Endpoints</a></h1>
+<p>Endpoints expose functionality on your API. You add endpoints to your <code>App</code> like this:</p>
+<pre><code class="language-go">app.Route(&quot;GET&quot;, &quot;/hello&quot;, helloEndpoint)
+</code></pre>
+<p>In the example above, <code>helloEndpoint</code> is just a function that impelents one of the valid interfaces:</p>
+<pre><code class="language-go">func()
+func() struct
+func() error
+func() (struct, error)
+func(input struct)
+func(input struct) struct
+func(input struct) error
+func(input struct) (struct, error)
+</code></pre>
+<p>As you can see from the interfaces, the endpoints can accept/return:</p>
+<ul>
+<li>Optional input struct</li>
+<li>Optional output struct</li>
+<li>Optional error</li>
+</ul>
+<p>The simplest endpoint you can write is one that have no inputs or outputs:</p>
+<pre><code class="language-go">func endpoint() {
+    println(&quot;some side effect...&quot;)
+}
+</code></pre>
+<p>And here's an example that's closer to what you'll see in real life:</p>
+<pre><code class="language-go">type loginInput struct {
+    Email string `request:&quot;json,email&quot;`
+    Password string `request:&quot;json,password&quot;`
+}
+
+type loginOutput struct {
+    Token string `response:&quot;json,token&quot;`
+}
+
+func loginEndpoint(input loginInput) (loginOutput, error) {
+    token, err := validateEmailAndPassword(input.Email, input.Password)
+    if err != nil {
+        return loginOutput{}, err
+    }
+    return loginOutput{token}, nil
+}
+</code></pre>
+<p>In the hypothetical example above, the endpoint two responses. If there's no error, it will send:</p>
+<pre><code>200 OK
+{&quot;token&quot;: &quot;some-session-token&quot;}
+</code></pre>
+<p>If an error is returned, response will be:</p>
+<pre><code>400 Bad Request
+{&quot;error&quot;: &quot;message from err.Error&quot;}
+</code></pre>
+<p>Inputs and outputs are further detailed next on this guide.</p>
+<h1 id="input"><a class="header" href="#input">Input</a></h1>
+<p>Tags are used to bind request data to your input structs so your endpoint doesn't have to deal with it. This article describes all the request bindings available.</p>
+<p>Here's a list of all the tag formats:</p>
+<pre><code>Header  request:&quot;header,name&quot;
+Path    request:&quot;path&quot;
+Query   request:&quot;query,name&quot;
+JSON    request:&quot;json,name&quot;
+Body    request:&quot;body&quot;
+</code></pre>
+<h2 id="header"><a class="header" href="#header">Header</a></h2>
+<p>Used to retrieve headers form the request. Example:</p>
+<pre><code class="language-go">type struct input {
+    ContentType string `request:&quot;header,Content-Type&quot;`
+}
+</code></pre>
+<p>Headers are case insensitive, so <code>content-type</code> would also work.</p>
+<h2 id="path"><a class="header" href="#path">Path</a></h2>
+<p>Used to retrieve the whole path from the request URL. Example:</p>
+<pre><code class="language-go">type struct input {
+    Path string `request:&quot;path&quot;`
+}
+</code></pre>
+<p>Path will then contain something like <code>/path/to/endpoint</code>.</p>
+<h2 id="query"><a class="header" href="#query">Query</a></h2>
+<p>Used to retrieve params from que URL query string. Example:</p>
+<pre><code class="language-go">type struct input {
+    Page string `request:&quot;query,page&quot;`
+}
+</code></pre>
+<p>Note how the type is <code>string</code> even though it probably contains a number. At this point, the framework does not perform implicit conversions automatically.</p>
+<h2 id="json"><a class="header" href="#json">JSON</a></h2>
+<p>Used to retrieve values from a JSON body.</p>
+<pre><code class="language-go">type struct input {
+    Page int `request:&quot;json,page&quot;`
+}
+</code></pre>
+<p>In this case, the types are as flexible as a regular JSON parse can be. Note however that only json objects will work (e.g. <code>{...}</code>). Inside the object, any valid JSON structure is allowed (even nested). Beyond the first nesting level, you'll need to properly make use of the <code>json:&quot;&quot;</code> tag, like you would normally outside of the framework.</p>
+<h2 id="body"><a class="header" href="#body">Body</a></h2>
+<p>Used to bind the whole request body stream.</p>
+<pre><code class="language-go">import &quot;io&quot;
+
+type struct input {
+    Body io.Reader `request:&quot;body&quot;`
+}
+</code></pre>
+<p>The body is retrieved as an <code>io.Reader</code> so you don't need to put all the bytes in memory at once. File uploads are a common use case.</p>
+<h1 id="output"><a class="header" href="#output">Output</a></h1>
+<p>Tags are used to bind your output fields to responses. This article describes all the response bindings available.</p>
+<p>Here's a list of all the output tag formats:</p>
+<pre><code>Header  response:&quot;header,name&quot;
+JSON    response:&quot;json,name&quot;
+Status  response:&quot;status&quot;
+Body    response:&quot;body&quot;
+</code></pre>
+<h2 id="header-1"><a class="header" href="#header-1">Header</a></h2>
+<p>Used to send a header to response. Example:</p>
+<pre><code class="language-go">type struct output {
+    ContentType string `response:&quot;header,Content-Type&quot;`
+}
+</code></pre>
+<p>Headers are case insensitive, so <code>content-type</code> would also work.</p>
+<h2 id="json-1"><a class="header" href="#json-1">JSON</a></h2>
+<p>Used to send JSON values on the response body.</p>
+<pre><code class="language-go">type struct output {
+    Page int `response:&quot;json,page&quot;`
+}
+</code></pre>
+<p>Like on inputs, types are flexible on the json binding. You can use any type that would be normally serializable with JSON. Note how your output will always be inside an object <code>{...}</code>. This is a limitation, but comes with some benefits. Always sending objects means that your output fields will have names, and adding new fields is possible without breaking contract with the API clients.</p>
+<p>Inside the object, any JSON structure is valid. Make sure you properly use <code>json:&quot;...&quot;</code> tags on the nested structures.</p>
+<h2 id="status"><a class="header" href="#status">Status</a></h2>
+<p>Used to send a response with different status code.</p>
+<pre><code class="language-go">type struct output {
+    Status int `response:&quot;status&quot;`
+}
+</code></pre>
+<p>Normally, an endpoint will response with the following status codes:</p>
+<ul>
+<li>200: when there's no error</li>
+<li>400: when you return an error from the endpoint</li>
+<li>500: in case of panics</li>
+</ul>
+<p>So this binding is basically about overriding that with an arbitrary code.</p>
+<h2 id="body-1"><a class="header" href="#body-1">Body</a></h2>
+<p>Used to send an arbitrary body stream with the response.</p>
+<pre><code class="language-go">import &quot;io&quot;
+
+type struct output {
+    Body io.Reader `response:&quot;body&quot;`
+}
+</code></pre>
+<p>The body is an <code>io.Reader</code> so you don't need to put all the bytes in memory at once. File downloads are a common use case.</p>
+<h1 id="error"><a class="header" href="#error">Error</a></h1>
+<p>Endpoints can optionally return an <code>error</code>. It can be any valid go <code>error</code>. Example:</p>
+<pre><code class="language-go">import &quot;errors&quot;
+
+func auth() error {
+    // ...
+    return errors.New(&quot;invalid access token&quot;)
+}
+</code></pre>
+<p>This will result in a &quot;bad request&quot; response:</p>
+<pre><code>400 Bad Request
+
+{&quot;error&quot;: &quot;invalid access token&quot;}
+</code></pre>
+<p>The status is 400 and the message is extracted from <code>err.Error()</code>.</p>
+<p>Although this might be good enough for simple use cases, sometimes it's necessary to send more complex error responses. For those cases, you can create a custom <code>error</code> from a struct, that binds to a response exactly how the output struct does.</p>
+<p>Here's a simple example:</p>
+<pre><code class="language-go">type authError struct {
+    Status int `response:&quot;status&quot;`
+    Message string `response:&quot;json,auth_error&quot;`
+}
+
+func (err authError) Error() string {
+    return err.Message
+}
+</code></pre>
+<p>Note how you need to implement the <code>Error() string</code> method even if you don't plan to use it. This is required so your struct is recognized as an <code>error</code> on go.</p>
+<p>An endpoint can then make use of this custom error:</p>
+<pre><code class="language-go">func auth() error {
+    // ...
+    return authError{401, &quot;invalid access token&quot;}
+}
+</code></pre>
+<p>This will then translate to the response:</p>
+<pre><code>401 Unauthorized
+
+{&quot;auth_error&quot;: &quot;invalid access token&quot;}
+</code></pre>
+<h1 id="panic"><a class="header" href="#panic">Panic</a></h1>
+<p>If an endpoint panics, the framework will send a generic server error response:</p>
+<pre><code>500 Internal Server Error
+
+{&quot;error&quot;: &quot;internal server error&quot;}
+</code></pre>
+<h2 id="error-handler"><a class="header" href="#error-handler">Error Handler</a></h2>
+<p>By default, panics are recovered by the app, logged to stdout and the 500 response is sent. This is the default error handler:</p>
+<pre><code class="language-go">func defaultErrorHandler(ierr interface{}, response http.ResponseWriter) {
+    log.Print(&quot;PANIC: &quot;, ierr)
+    response.Header().Set(&quot;Content-Type&quot;, &quot;application/json&quot;)
+    response.WriteHeader(500)
+    response.Write([]byte(`{&quot;error&quot;: &quot;internal server error&quot;}\n`))
+}
+</code></pre>
+<p>One can override this behavior by replacing the error handler on the <code>App</code>:</p>
+<pre><code class="language-go">app.ErrorHandler(myErrorHandler)
+</code></pre>
+<p>As with the default handler, the custom error handler is a function that must take the error interface and response writer. Here's an example:</p>
+<pre><code class="language-go">import &quot;net/http&quot;
+
+func myErrorHandler(ierr interface{}, response http.ResponseWriter) {
+    // send metrics somewhere...
+    response.WriteHeader(503)
+    response.Write([]byte(`Service Unavailable`))
+}
+</code></pre>
+<h2 id="panic-custom-error"><a class="header" href="#panic-custom-error">Panic Custom Error</a></h2>
+<p>It's also possible to panic a custom error that binds to response. This is a shortcut for aborting requests, usually most useful on reusable logic.</p>
+<p>Let's say you want to craft a reusable <code>auth</code> function, to reuse across endpoints. This panic mechanism will allow you to send a 401 response from this function, instead of repeating the <code>if err</code> logic every time. e.g.</p>
+<pre><code class="language-go">type authError struct {
+    Status int `response:&quot;status&quot;`
+    Message string `response:&quot;json,auth_error&quot;`
+}
+
+func (err authError) Error() string {
+    return err.Message
+}
+
+func auth(token string) User {
+    // ...
+    if err != nil {
+        panic(authError{401, &quot;missing or invalid access token&quot;})
+    }
+    return token
+}
+</code></pre>
+<p>Endpoints can then make use of this logic without worrying about auth error responses:</p>
+<pre><code>func myProfile(input myProfileInput) myProfileOutput {
+    user := auth(input.Token)
+    // ...
+}
+</code></pre>
+<h1 id="testing"><a class="header" href="#testing">Testing</a></h1>
+<p>Testing endpoints is quite easy. If you disregard the binding tags, they are just regular go functions. They don't depend on the framework at all, so you can test them as you would any regular function.</p>
+<p>Here's an example of testing a hypothetical <code>loginEndpoint</code> function:</p>
+<pre><code class="language-go">import &quot;testing&quot;
+
+func TestLogin(t *testing.T) {
+
+    t.Run(&quot;valid input returns token&quot;, func(t *testing.T) {
+        output, err := loginEndpoint(loginInput{
+            Email: &quot;valid.email@example.org&quot;,
+            Password: &quot;some-valid-password&quot;,
+        })
+        if err != nil {
+            t.Errorf(&quot;unexpected error: %s&quot;, err)
+        }
+        if output.Token == &quot;&quot; {
+            t.Errorf(&quot;token was not returned&quot;)
+        }
+    })
+
+    t.Run(&quot;invalid input returns error&quot;, func(t *testing.T) {
+        _, err := loginEndpoint(loginInput{})
+        if err == nil {
+            t.Error(&quot;did not return an error&quot;)
+        }
+    })
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>
