@@ -4,5 +4,5 @@
     - [Input](./input.md)
     - [Output](./output.md)
     - [Error](./error.md)
-    - [Panic]()
+    - [Panic](./panic.md)
 - [Testing]()
