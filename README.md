@@ -3,6 +3,12 @@
 Gap is a web framework aimed at removing HTTP boilerplate from your application.
 
 
+## Docs
+
+* User guide: https://hugollm.github.io/gap
+* API reference: https://pkg.go.dev/github.com/hugollm/gap
+
+
 ## Overview
 
 Here's a minimal example of an application with one endpoint:
