@@ -1,7 +1,7 @@
 [Introduction](./introduction.md)
 - [App](./app.md)
 - [Endpoints](./endpoints.md)
-    - [Input]()
+    - [Input](./input.md)
     - [Output]()
     - [Error]()
     - [Panic]()
