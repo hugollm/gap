@@ -11,7 +11,7 @@ import (
 type lazyRequest struct {
 	httpRequest *http.Request
 	parsedQuery url.Values
-	parsedJson  map[string]interface{}
+	parsedJSON  map[string]interface{}
 	body        io.Reader
 }
 
@@ -35,17 +35,17 @@ func (request *lazyRequest) getQuery(key string) string {
 	return request.parsedQuery.Get(key)
 }
 
-func (request *lazyRequest) getJson(key string) interface{} {
-	if request.parsedJson == nil {
+func (request *lazyRequest) getJSON(key string) interface{} {
+	if request.parsedJSON == nil {
 		body, err := ioutil.ReadAll(request.httpRequest.Body)
 		if err != nil {
 			panic(err)
 		}
-		if err := json.Unmarshal(body, &request.parsedJson); err != nil {
+		if err := json.Unmarshal(body, &request.parsedJSON); err != nil {
 			panic(requestError{400, "invalid json"})
 		}
 	}
-	return request.parsedJson[key]
+	return request.parsedJSON[key]
 }
 
 type lazyResponse struct {
@@ -59,7 +59,7 @@ func newLazyResponse(httpResponse http.ResponseWriter) *lazyResponse {
 	return &lazyResponse{httpResponse: httpResponse, status: 200}
 }
 
-func (response *lazyResponse) setJson(key string, value interface{}) {
+func (response *lazyResponse) setJSON(key string, value interface{}) {
 	if response.jsonMap == nil {
 		response.jsonMap = map[string]interface{}{}
 	}

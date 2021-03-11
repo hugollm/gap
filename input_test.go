@@ -85,11 +85,11 @@ func TestInput(t *testing.T) {
 		type tIn struct {
 			HeaderAuth string `request:"header,auth"`
 			QueryAuth  string `request:"query,auth"`
-			JsonAuth   string `request:"json,auth"`
+			JSONAuth   string `request:"json,auth"`
 		}
 		type tOut struct{}
 		fn := func(input tIn) (tOut, error) {
-			if input.HeaderAuth != "hauth" || input.QueryAuth != "qauth" || input.JsonAuth != "jauth" {
+			if input.HeaderAuth != "hauth" || input.QueryAuth != "qauth" || input.JSONAuth != "jauth" {
 				t.Error("failed to fetch input from multiple sources")
 			}
 			return tOut{}, nil

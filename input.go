@@ -65,7 +65,7 @@ type jsonInput struct {
 }
 
 func (input jsonInput) read(request *lazyRequest) reflect.Value {
-	return reflect.ValueOf(request.getJson(input.key))
+	return reflect.ValueOf(request.getJSON(input.key))
 }
 
 type bodyInput struct{}

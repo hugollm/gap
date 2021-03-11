@@ -78,7 +78,7 @@ func TestApp(t *testing.T) {
 		body, _ := ioutil.ReadAll(response.Result().Body)
 		out := readProfileOutput{}
 		json.Unmarshal(body, &out)
-		if out.Id != 1 || out.Email != "johndoe@example.org" {
+		if out.ID != 1 || out.Email != "johndoe@example.org" {
 			t.Errorf("failed to set json body")
 		}
 	})
@@ -149,11 +149,11 @@ func TestApp(t *testing.T) {
 
 type readProfileInput struct {
 	Auth      string `request:"header,auth"`
-	ProfileId int    `request:"json,profile_id"`
+	ProfileID int    `request:"json,profile_id"`
 }
 
 type readProfileOutput struct {
-	Id    int    `response:"json,id"`
+	ID    int    `response:"json,id"`
 	Email string `response:"json,email"`
 }
 

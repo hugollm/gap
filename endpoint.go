@@ -126,7 +126,7 @@ func (ep *endpoint) writeError(httpResponse http.ResponseWriter, rvErr reflect.V
 			field.write(response, rvErr.FieldByName(name))
 		}
 	} else {
-		response.setJson("error", rvErr.Interface().(error).Error())
+		response.setJSON("error", rvErr.Interface().(error).Error())
 	}
 	response.send()
 }

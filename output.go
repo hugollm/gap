@@ -44,7 +44,7 @@ type jsonOutput struct {
 
 func (output jsonOutput) write(response *lazyResponse, value reflect.Value) {
 	response.httpResponse.Header().Set("Content-Type", "application/json")
-	response.setJson(output.key, value.Interface())
+	response.setJSON(output.key, value.Interface())
 }
 
 type statusOutput struct{}
