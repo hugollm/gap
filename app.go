@@ -28,7 +28,7 @@ func defaultErrorHandler(ierr interface{}, response http.ResponseWriter) {
 	log.Print("PANIC: ", ierr)
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(500)
-	response.Write([]byte(`{"error": "internal server error"}\n`))
+	response.Write([]byte(`{"error":"internal server error"}`))
 }
 
 // Route binds request method and path to target endpoint

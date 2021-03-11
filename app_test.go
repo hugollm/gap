@@ -123,7 +123,7 @@ func TestApp(t *testing.T) {
 			if response.Header().Get("content-type") != "application/json" {
 				t.Error("failed to set content-type header")
 			}
-			if response.Body.String() != `{"error": "internal server error"}\n` {
+			if response.Body.String() != `{"error":"internal server error"}` {
 				t.Error("failed to set json body")
 			}
 		})
