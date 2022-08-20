@@ -41,7 +41,7 @@ func helloEndpoint(input helloInput) (helloOutput, error) {
 
 This endpoint gets the `User-Agent` header from the request and outputs a hello message on the response body as JSON.
 
-```json
+```
 GET /
 User-Agent: golang
 ---
